@@ -1,107 +1,121 @@
-# SimpleAuth
+# โครงงาน SimpleAuth
 
-เว็บแอปพลิเคชันตัวอย่างสำหรับสมัครสมาชิกและเข้าสู่ระบบ พัฒนาด้วย Next.js รองรับการยืนยันตัวตนด้วยอีเมลและรหัสผ่าน รวมถึง GitHub OAuth
+เว็บแอปพลิเคชันตัวอย่างสำหรับจัดการการสมัครสมาชิกและเข้าสู่ระบบ พัฒนาด้วย Next.js ผู้ใช้สามารถสมัครบัญชี เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน หรือเลือกใช้ GitHub OAuth ได้ นอกจากนี้ยังมีตัวอย่างการกำหนดบทบาทและการจำกัดสิทธิ์การเข้าถึงหน้าสำหรับผู้ดูแลระบบ
 
-## ความสามารถ
+## วัตถุประสงค์
+
+- ศึกษาการพัฒนาเว็บแอปพลิเคชันด้วย Next.js และ TypeScript
+- จัดเก็บข้อมูลบัญชีผู้ใช้ในฐานข้อมูล SQLite ผ่าน Prisma ORM
+- เรียนรู้การตรวจสอบข้อมูลและการแฮชรหัสผ่านก่อนจัดเก็บ
+- สาธิตการยืนยันตัวตนและการกำหนดสิทธิ์ตามบทบาทของผู้ใช้
+
+## ความสามารถของระบบ
 
 - สมัครสมาชิกด้วยชื่อ อีเมล และรหัสผ่าน
 - ตรวจสอบรูปแบบอีเมล ความยาวรหัสผ่าน และการยืนยันรหัสผ่าน
-- แฮชรหัสผ่านก่อนบันทึกลงฐานข้อมูล
-- เข้าสู่ระบบด้วยอีเมล/รหัสผ่าน หรือ GitHub
-- กำหนดบทบาท `USER`, `STAFF` และ `ADMIN` เพื่อควบคุมสิทธิ์หน้า Admin
-- หน้าแรกและหน้าสมัคร/เข้าสู่ระบบรองรับการแสดงผลบนมือถือ
+- แฮชรหัสผ่านด้วย `bcryptjs` ก่อนบันทึกลงฐานข้อมูล
+- เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน หรือ GitHub OAuth
+- กำหนดบทบาทผู้ใช้เป็น `USER`, `STAFF` หรือ `ADMIN`
+- จำกัดการเข้าถึงหน้า Admin เฉพาะบัญชีที่มีบทบาท `ADMIN`
+- แสดงหน้าแจ้งเตือนเมื่อผู้ใช้ไม่มีสิทธิ์เข้าถึง
 
-## เทคโนโลยี
+## เทคโนโลยีที่ใช้
 
-- Next.js 16 และ React 19
-- TypeScript และ Tailwind CSS 4
-- Auth.js (NextAuth.js) สำหรับยืนยันตัวตน
-- Prisma ORM 7 และ SQLite
-- bcryptjs สำหรับแฮชรหัสผ่าน
+| เทคโนโลยี | การใช้งาน |
+| --- | --- |
+| Next.js 16, React 19 | พัฒนาเว็บแอปพลิเคชัน |
+| TypeScript | เพิ่มความปลอดภัยในการจัดการชนิดข้อมูล |
+| Tailwind CSS 4 | จัดรูปแบบหน้าจอ |
+| Auth.js (NextAuth.js) | จัดการการเข้าสู่ระบบ |
+| Prisma ORM 7 | ติดต่อและจัดการฐานข้อมูล |
+| SQLite, better-sqlite3 | จัดเก็บข้อมูล |
+| bcryptjs | แฮชรหัสผ่าน |
 
-## เริ่มต้นใช้งาน
+## โครงสร้างข้อมูล
 
-### ข้อกำหนด
+ระบบมีตาราง `User` สำหรับจัดเก็บข้อมูลบัญชี ประกอบด้วยรหัสผู้ใช้ ชื่อ อีเมล รหัสผ่านที่ผ่านการแฮช บทบาท และวันเวลาที่สร้างหรือแก้ไขบัญชี อีเมลของผู้ใช้แต่ละบัญชีต้องไม่ซ้ำกัน
+
+ไฟล์ Prisma schema อยู่ที่ `app/prisma/schema.prisma`
+
+## เส้นทางหลักในระบบ
+
+| URL | รายละเอียด |
+| --- | --- |
+| `/` | หน้าแรก |
+| `/signUp` | หน้าสมัครสมาชิก |
+| `/login` | หน้าเข้าสู่ระบบ |
+| `/admin` | หน้าสำหรับผู้ใช้ที่มีบทบาท `ADMIN` |
+| `/unauthorized` | หน้าแจ้งเตือนกรณีไม่มีสิทธิ์ |
+| `/api/auth/*` | เส้นทางที่ Auth.js ใช้จัดการการยืนยันตัวตน |
+
+## ข้อกำหนดก่อนติดตั้ง
 
 - Node.js 20.9 ขึ้นไป
 - npm
+- สำหรับ Windows หากติดตั้ง `better-sqlite3` ไม่สำเร็จเพราะไม่มีเครื่องมือคอมไพล์ ให้ติดตั้ง Visual Studio Build Tools 2022 พร้อม workload **Desktop development with C++**
 
-### ติดตั้ง
+## วิธีติดตั้งและเริ่มใช้งาน
 
-เปิด Terminal ในโฟลเดอร์ `my-app` แล้วติดตั้ง dependencies:
+1. เปิด Terminal ในโฟลเดอร์โปรเจกต์ที่มีไฟล์ `package.json`
+2. ติดตั้ง dependencies:
 
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-สร้างไฟล์ `.env.local` ในโฟลเดอร์ `my-app`:
+3. สร้างไฟล์ `.env.local` ในโฟลเดอร์เดียวกับ `package.json` และกำหนดค่าดังนี้:
 
-```env
-DATABASE_URL="file:./dev.db"
-AUTH_SECRET="ใส่ค่า secret แบบสุ่มที่คาดเดาได้ยาก"
-AUTH_GITHUB_ID="GitHub OAuth Client ID"
-AUTH_GITHUB_SECRET="GitHub OAuth Client Secret"
-```
+   ```env
+   DATABASE_URL="file:./dev.db"
+   AUTH_SECRET="ใส่ค่า secret แบบสุ่มและคาดเดาได้ยาก"
+   AUTH_GITHUB_ID=""
+   AUTH_GITHUB_SECRET=""
+   ```
 
-ตั้งค่า `AUTH_SECRET` ให้เป็นค่าลับที่สุ่มและไม่ซ้ำกับโปรเจกต์อื่น หากยังไม่ใช้ GitHub OAuth สามารถเว้นค่าตัวแปร `AUTH_GITHUB_ID` และ `AUTH_GITHUB_SECRET` ไว้ได้
+   `AUTH_SECRET` ใช้สำหรับการยืนยันตัวตนและควรเก็บเป็นความลับ หากต้องการเข้าสู่ระบบด้วย GitHub ให้ใส่ GitHub OAuth Client ID และ Client Secret ในตัวแปรที่เกี่ยวข้อง หากไม่ใช้ GitHub OAuth สามารถปล่อยค่าว่างไว้ได้
 
-ซิงก์ schema กับ SQLite และสร้าง Prisma Client:
+4. ซิงก์ schema กับฐานข้อมูลและสร้าง Prisma Client:
 
-```bash
-npm run db:setup
-```
+   ```bash
+   npm run db:setup
+   ```
 
-เริ่มเซิร์ฟเวอร์:
+5. เริ่มเซิร์ฟเวอร์สำหรับพัฒนา:
 
-```bash
-npm run dev
-```
+   ```bash
+   npm run dev
+   ```
 
-เปิด [http://localhost:3000](http://localhost:3000) ในเบราว์เซอร์
+6. เปิด [http://localhost:3000](http://localhost:3000) ในเว็บเบราว์เซอร์
 
-## ตั้งค่า GitHub OAuth
+### หมายเหตุสำหรับ Windows
 
-สร้าง GitHub OAuth App แล้วกำหนด URL ดังนี้:
+หาก `npm install` แสดงข้อความ `Could not find any Visual Studio installation to use` หมายความว่าเครื่องมือคอมไพล์ที่ `better-sqlite3` ต้องใช้ยังไม่พร้อมใช้งาน ให้ติดตั้ง Visual Studio Build Tools 2022 โดยเลือก **Desktop development with C++** จากนั้นเปิด Terminal ใหม่และรัน `npm install` อีกครั้ง
+
+## ตั้งค่า GitHub OAuth (ไม่บังคับ)
+
+สร้าง OAuth App ใน GitHub แล้วกำหนด URL สำหรับการพัฒนาในเครื่องดังนี้:
 
 - **Homepage URL:** `http://localhost:3000`
 - **Authorization callback URL:** `http://localhost:3000/api/auth/callback/github`
 
-นำ Client ID และ Client Secret มาใส่ใน `AUTH_GITHUB_ID` และ `AUTH_GITHUB_SECRET` ตามลำดับ จากนั้นเริ่มเซิร์ฟเวอร์ใหม่
-
-## เส้นทางในแอป
-
-| URL | รายละเอียด |
-| --- | --- |
-| `/` | หน้าแรก พร้อมปุ่มสมัครสมาชิกและเข้าสู่ระบบ |
-| `/signUp` | สมัครสมาชิก |
-| `/login` | เข้าสู่ระบบด้วยอีเมล/รหัสผ่าน หรือ GitHub |
-| `/admin` | หน้าสำหรับผู้ใช้ที่มีบทบาท `ADMIN` เท่านั้น |
-| `/unauthorized` | หน้าแจ้งเตือนเมื่อไม่มีสิทธิ์เข้าถึง |
-
-บัญชีที่สมัครผ่านหน้าเว็บจะได้รับบทบาท `USER` โดยค่าเริ่มต้น การเข้าหน้า `/admin` ต้องใช้บัญชีที่ได้รับบทบาท `ADMIN`
-
-## ฐานข้อมูล
-
-โปรเจกต์ใช้ SQLite โดยค่าเริ่มต้น บันทึกฐานข้อมูลไว้ที่ `my-app/dev.db` และกำหนด Prisma schema ใน `app/prisma/schema.prisma`
-
-หากแก้ไข schema ให้รันคำสั่งนี้อีกครั้ง:
-
-```bash
-npm run db:setup
-```
+นำ Client ID และ Client Secret ที่ได้ไปกำหนดใน `AUTH_GITHUB_ID` และ `AUTH_GITHUB_SECRET` ในไฟล์ `.env.local` แล้วเริ่มเซิร์ฟเวอร์ใหม่ การเข้าสู่ระบบด้วย GitHub จะใช้งานไม่ได้จนกว่าจะตั้งค่า OAuth นี้
 
 ## คำสั่งที่ใช้บ่อย
 
 ```bash
 npm run dev       # เริ่มเซิร์ฟเวอร์สำหรับพัฒนา
 npm run lint      # ตรวจสอบโค้ดด้วย ESLint
-npm run build     # สร้างแอปสำหรับใช้งานจริง
+npm run build     # สร้าง production build
 npm run start     # เริ่มเซิร์ฟเวอร์จาก production build
-npm run db:setup  # ซิงก์ฐานข้อมูลและสร้าง Prisma Client
+npm run db:setup  # ซิงก์ schema และสร้าง Prisma Client
 ```
 
-## ความปลอดภัย
+## ข้อจำกัดและข้อควรพิจารณา
 
-- อย่า commit ไฟล์ `.env.local` หรือเผยแพร่ `AUTH_SECRET` และ GitHub Client Secret
-- รหัสผ่านถูกแฮชก่อนจัดเก็บ และบัญชีที่สมัครใหม่เป็น `USER`
-- ควรตั้งค่า secret และ OAuth credentials แยกกันระหว่าง development กับ production
+- ในโค้ดปัจจุบัน การสมัครสมาชิกผ่านหน้าเว็บกำหนดบทบาทเริ่มต้นเป็น `ADMIN` ใน `app/signUp/actions.ts` จึงควรเปลี่ยนเป็น `USER` ก่อนเปิดให้บุคคลทั่วไปสมัครหรือใช้งานจริง
+- ฐานข้อมูล SQLite ที่ใช้ในชุดนี้เหมาะสำหรับการทดลองและพัฒนา ควรประเมินการเลือกฐานข้อมูลและการตั้งค่าความปลอดภัยเพิ่มเติมก่อนนำระบบขึ้นใช้งานจริง
+- ห้ามเผยแพร่หรือ commit ไฟล์ `.env.local`, `AUTH_SECRET` และ GitHub Client Secret
+
+
+## นายกิตติศักด์ ขันเเข็ง 673450031-4
